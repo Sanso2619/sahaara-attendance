@@ -8,6 +8,7 @@ import {
   createClassroomSchema,
   updateClassroomSchema
 } from '../controllers/classroom.controller';
+import { getClassroomRosterHandler } from '../controllers/student.controller';
 import { authMiddleware } from '../middleware/auth';
 import { tenantMiddleware } from '../middleware/tenant';
 import { requireRole } from '../middleware/rbac';
@@ -28,6 +29,9 @@ router.post(
   validateBody(createClassroomSchema),
   createClassroomHandler
 );
+
+// View classroom roster (students actively enrolled)
+router.get('/:id/roster', getClassroomRosterHandler);
 
 // View single classroom
 router.get('/:id', getClassroomByIdHandler);

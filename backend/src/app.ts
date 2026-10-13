@@ -10,6 +10,7 @@ import organizationRoutes from './routes/organization.routes';
 import schoolRoutes from './routes/school.routes';
 import classroomRoutes from './routes/classroom.routes';
 import teacherRoutes from './routes/teacher.routes';
+import studentRoutes from './routes/student.routes';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/organizations', organizationRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/classrooms', classroomRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/students', studentRoutes);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

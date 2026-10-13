@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Building2, School, Users, ClipboardCheck, BarChart3, LogOut, Shield } from 'lucide-react';
+import { Building2, School, Users, ClipboardCheck, BarChart3, LogOut, Shield, GraduationCap } from 'lucide-react';
 import { Button } from '../ui/components';
 
 export interface UserSession {
@@ -32,6 +32,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     if (user.role === 'PLATFORM_ADMIN') {
       return [
         { label: 'Organizations', href: '/dashboard/organizations', icon: Building2 },
+        { label: 'Students', href: '/dashboard/students', icon: GraduationCap },
         { label: 'System Audit', href: '/dashboard/audit', icon: Shield },
       ];
     }
@@ -41,6 +42,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
         { label: 'Overview', href: '/dashboard', icon: BarChart3 },
         { label: 'Schools', href: '/dashboard/schools', icon: School },
         { label: 'Classrooms & Teachers', href: '/dashboard/classrooms', icon: Users },
+        { label: 'Students & Enrolment', href: '/dashboard/students', icon: GraduationCap },
         { label: 'Attendance Reports', href: '/dashboard/reports', icon: ClipboardCheck },
       ];
     }
@@ -48,6 +50,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     // TEACHER
     return [
       { label: 'My Classrooms', href: '/dashboard', icon: School },
+      { label: 'Class Roster', href: '/dashboard/students', icon: GraduationCap },
       { label: 'Mark Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
       { label: 'Class History', href: '/dashboard/history', icon: BarChart3 },
     ];

@@ -157,6 +157,72 @@ export async function seedDemoData() {
       [org2Id, org2ClassId, teacher2Id]
     );
 
+    // 10. Demo Students (strictly anonymized demo profiles)
+    const stu1Res = await client.query(
+      `INSERT INTO students (organization_id, school_id, roll_number, first_name, last_name, date_of_birth, gender, guardian_name, guardian_contact, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)
+       ON CONFLICT (organization_id, roll_number) DO UPDATE SET first_name = EXCLUDED.first_name
+       RETURNING id;`,
+      [org1Id, school1Id, 'STU-001', 'Aarav', 'Kumar', '2018-05-12', 'MALE', 'Ramesh Kumar', '+91 98000 11111']
+    );
+    const stu1Id = stu1Res.rows[0].id;
+
+    const stu2Res = await client.query(
+      `INSERT INTO students (organization_id, school_id, roll_number, first_name, last_name, date_of_birth, gender, guardian_name, guardian_contact, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)
+       ON CONFLICT (organization_id, roll_number) DO UPDATE SET first_name = EXCLUDED.first_name
+       RETURNING id;`,
+      [org1Id, school1Id, 'STU-002', 'Diya', 'Sharma', '2018-08-20', 'FEMALE', 'Meena Sharma', '+91 98000 22222']
+    );
+    const stu2Id = stu2Res.rows[0].id;
+
+    const stu3Res = await client.query(
+      `INSERT INTO students (organization_id, school_id, roll_number, first_name, last_name, date_of_birth, gender, guardian_name, guardian_contact, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)
+       ON CONFLICT (organization_id, roll_number) DO UPDATE SET first_name = EXCLUDED.first_name
+       RETURNING id;`,
+      [org1Id, school1Id, 'STU-003', 'Kabir', 'Patel', '2017-02-14', 'MALE', 'Suresh Patel', '+91 98000 33333']
+    );
+    const stu3Id = stu3Res.rows[0].id;
+
+    const stu4Res = await client.query(
+      `INSERT INTO students (organization_id, school_id, roll_number, first_name, last_name, date_of_birth, gender, guardian_name, guardian_contact, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)
+       ON CONFLICT (organization_id, roll_number) DO UPDATE SET first_name = EXCLUDED.first_name
+       RETURNING id;`,
+      [org2Id, org2SchoolId, 'BRT-STU-01', 'Zoya', 'Khan', '2018-11-09', 'FEMALE', 'Farida Khan', '+91 98000 44444']
+    );
+    const stu4Id = stu4Res.rows[0].id;
+
+    // 11. Enrollments
+    await client.query(
+      `INSERT INTO enrollments (organization_id, classroom_id, student_id, is_active)
+       VALUES ($1, $2, $3, TRUE)
+       ON CONFLICT DO NOTHING;`,
+      [org1Id, class1Id, stu1Id]
+    );
+
+    await client.query(
+      `INSERT INTO enrollments (organization_id, classroom_id, student_id, is_active)
+       VALUES ($1, $2, $3, TRUE)
+       ON CONFLICT DO NOTHING;`,
+      [org1Id, class1Id, stu2Id]
+    );
+
+    await client.query(
+      `INSERT INTO enrollments (organization_id, classroom_id, student_id, is_active)
+       VALUES ($1, $2, $3, TRUE)
+       ON CONFLICT DO NOTHING;`,
+      [org1Id, class1Id, stu3Id]
+    );
+
+    await client.query(
+      `INSERT INTO enrollments (organization_id, classroom_id, student_id, is_active)
+       VALUES ($1, $2, $3, TRUE)
+       ON CONFLICT DO NOTHING;`,
+      [org2Id, org2ClassId, stu4Id]
+    );
+
     await client.query('COMMIT');
     console.log('✅ Development seeding finished successfully.');
     console.log(' Credentials:');
