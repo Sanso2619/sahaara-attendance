@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Building2, School, Users, ClipboardCheck, BarChart3, LogOut, Shield, GraduationCap } from 'lucide-react';
+import { Building2, School, Users, ClipboardCheck, BarChart3, LogOut, Shield, GraduationCap, Bell } from 'lucide-react';
 import { Button } from '../ui/components';
 
 export interface UserSession {
@@ -34,6 +34,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
         { label: 'Organizations', href: '/dashboard/organizations', icon: Building2 },
         { label: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
         { label: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart3 },
+        { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
         { label: 'Students', href: '/dashboard/students', icon: GraduationCap },
         { label: 'System Audit', href: '/dashboard/audit', icon: Shield },
       ];
@@ -44,6 +45,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
         { label: 'Overview', href: '/dashboard', icon: BarChart3 },
         { label: 'Daily Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
         { label: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart3 },
+        { label: 'Notifications & Follow-ups', href: '/dashboard/notifications', icon: Bell },
         { label: 'Schools', href: '/dashboard/schools', icon: School },
         { label: 'Classrooms & Teachers', href: '/dashboard/classrooms', icon: Users },
         { label: 'Students & Enrolment', href: '/dashboard/students', icon: GraduationCap },
@@ -54,6 +56,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     return [
       { label: 'Daily Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
       { label: 'Reports & History', href: '/dashboard/reports', icon: BarChart3 },
+      { label: 'Follow-up Status', href: '/dashboard/notifications', icon: Bell },
       { label: 'My Classrooms', href: '/dashboard', icon: School },
       { label: 'Class Roster', href: '/dashboard/students', icon: GraduationCap },
     ];

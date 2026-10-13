@@ -207,6 +207,7 @@ describe('Phase 4: Daily Attendance Register & Verification Suite', () => {
         release: jest.fn()
       };
       jest.spyOn(pool, 'connect').mockResolvedValue(mockClient as any);
+      jest.spyOn(pool, 'query').mockResolvedValue({ rows: [] } as any);
 
       mockClient.query
         // 1. Classroom check

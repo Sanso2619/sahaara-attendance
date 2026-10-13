@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { pool } from '../config/db';
+import { processAttendanceFollowups } from '../services/notification.service';
 
 export const saveAttendanceSchema = z.object({
   classroomId: z.string().uuid('Valid classroom ID required'),
@@ -423,6 +424,22 @@ export async function submitAttendanceHandler(req: Request, res: Response) {
     }
 
     await client.query('COMMIT');
+
+    // 5. Trigger automated guardian notifications (safe follow-up processor)
+    let notifications = { totalTriggered: 0, sent: 0, failed: 0, skipped: 0 };
+    try {
+      notifications = await processAttendanceFollowups({
+        sessionId,
+        organizationId: targetOrgId,
+        classroomId,
+        date,
+        triggeredByUserId: userId!,
+        records
+      });
+    } catch (notifErr) {
+      console.error('Failed to trigger attendance follow-up notifications:', notifErr);
+    }
+
     return res.status(200).json({
       message: 'Attendance register submitted and finalized successfully.',
       session: {
@@ -431,7 +448,8 @@ export async function submitAttendanceHandler(req: Request, res: Response) {
         date,
         status: 'SUBMITTED'
       },
-      recordsCount: records.length
+      recordsCount: records.length,
+      notifications
     });
   } catch (err) {
     await client.query('ROLLBACK');
