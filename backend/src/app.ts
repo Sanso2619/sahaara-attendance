@@ -6,6 +6,10 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
 import healthRoutes from './routes/health.routes';
+import organizationRoutes from './routes/organization.routes';
+import schoolRoutes from './routes/school.routes';
+import classroomRoutes from './routes/classroom.routes';
+import teacherRoutes from './routes/teacher.routes';
 
 const app = express();
 
@@ -27,6 +31,10 @@ if (env.NODE_ENV !== 'test') {
 // API Route mount points
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/schools', schoolRoutes);
+app.use('/api/classrooms', classroomRoutes);
+app.use('/api/teachers', teacherRoutes);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
