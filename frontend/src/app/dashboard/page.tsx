@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
 import { StatusBadge, Button } from '@/components/ui/components';
-import { School, Users, Building2, Calendar, ArrowRight, GraduationCap } from 'lucide-react';
+import { School, Users, Building2, Calendar, ArrowRight, GraduationCap, ClipboardCheck } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
   const { user } = useAuth();
@@ -202,15 +202,15 @@ export default function DashboardOverviewPage() {
           </Link>
 
           <Link
-            href="/dashboard/students"
+            href="/dashboard/attendance"
             className="p-4 rounded-lg border border-gray-200 hover:border-brand-700 hover:bg-brand-50/30 transition-colors group flex items-start gap-3"
           >
             <div className="p-2 bg-brand-100 rounded-lg text-brand-800 group-hover:bg-brand-700 group-hover:text-white transition-colors">
-              <GraduationCap className="w-5 h-5" />
+              <ClipboardCheck className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-800">Students & Enrolment</p>
-              <p className="text-xs text-gray-500 mt-0.5">Register students & manage classroom rosters</p>
+              <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-800">Daily Attendance</p>
+              <p className="text-xs text-gray-500 mt-0.5">Take register, review draft & view daily percentages</p>
             </div>
           </Link>
         </div>

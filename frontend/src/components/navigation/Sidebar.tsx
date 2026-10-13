@@ -32,6 +32,8 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     if (user.role === 'PLATFORM_ADMIN') {
       return [
         { label: 'Organizations', href: '/dashboard/organizations', icon: Building2 },
+        { label: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
+        { label: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart3 },
         { label: 'Students', href: '/dashboard/students', icon: GraduationCap },
         { label: 'System Audit', href: '/dashboard/audit', icon: Shield },
       ];
@@ -40,19 +42,20 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     if (user.role === 'ORG_ADMIN') {
       return [
         { label: 'Overview', href: '/dashboard', icon: BarChart3 },
+        { label: 'Daily Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
+        { label: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart3 },
         { label: 'Schools', href: '/dashboard/schools', icon: School },
         { label: 'Classrooms & Teachers', href: '/dashboard/classrooms', icon: Users },
         { label: 'Students & Enrolment', href: '/dashboard/students', icon: GraduationCap },
-        { label: 'Attendance Reports', href: '/dashboard/reports', icon: ClipboardCheck },
       ];
     }
 
     // TEACHER
     return [
+      { label: 'Daily Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
+      { label: 'Reports & History', href: '/dashboard/reports', icon: BarChart3 },
       { label: 'My Classrooms', href: '/dashboard', icon: School },
       { label: 'Class Roster', href: '/dashboard/students', icon: GraduationCap },
-      { label: 'Mark Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
-      { label: 'Class History', href: '/dashboard/history', icon: BarChart3 },
     ];
   };
 
