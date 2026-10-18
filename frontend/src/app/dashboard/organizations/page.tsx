@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { Button, Input, StatusBadge, Modal, ConfirmDialog, EmptyState } from '@/components/ui/components';
+import { Button, Input, StatusBadge, Modal, ConfirmDialog, EmptyState, TableSkeleton } from '@/components/ui/components';
 import { Building2, Plus, Search, Edit2, Power, Mail, Phone, RefreshCw, AlertCircle, School, Users } from 'lucide-react';
 
 interface OrganizationItem {
@@ -221,10 +221,7 @@ export default function OrganizationsManagementPage() {
       {/* Main Content Area */}
       <div className="mt-6">
         {loading ? (
-          <div className="py-16 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
-            <div className="w-6 h-6 border-2 border-brand-700 border-t-transparent rounded-full animate-spin" />
-            <span>Loading organizations...</span>
-          </div>
+          <TableSkeleton rows={4} cols={5} />
         ) : organizations.length === 0 ? (
           <EmptyState
             icon={Building2}

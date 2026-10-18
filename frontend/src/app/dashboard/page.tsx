@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import { Button } from '@/components/ui/components';
+import { Button, CardSkeleton } from '@/components/ui/components';
 import { useLiveDashboard, SocketConnectionStatus } from '@/lib/use-socket';
 import {
   School,
@@ -219,101 +219,112 @@ export default function DashboardOverviewPage() {
 
       {/* Primary Live KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Overall Attendance Rate */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Attendance Rate</span>
-              <div className="p-2 bg-emerald-50 rounded-lg text-emerald-700">
-                <Percent className="w-4 h-4" />
+        {stats.loading ? (
+          <>
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </>
+        ) : (
+          <>
+            {/* Overall Attendance Rate */}
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Attendance Rate</span>
+                  <div className="p-2 bg-emerald-50 rounded-lg text-emerald-700">
+                    <Percent className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-extrabold text-gray-900 mt-2">
+                  {analytics ? `${analytics.overallPercentage}%` : 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {analytics ? `${analytics.presentCount} present • ${analytics.lateCount} late` : '30-day recorded rate'}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>(Present + Late) / Total</span>
+                <Link href="/dashboard/reports" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
+                  Analytics <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-gray-900 mt-2">
-              {stats.loading ? '...' : analytics ? `${analytics.overallPercentage}%` : 'N/A'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {analytics ? `${analytics.presentCount} present • ${analytics.lateCount} late` : '30-day recorded rate'}
-            </p>
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-            <span>(Present + Late) / Total</span>
-            <Link href="/dashboard/reports" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
-              Analytics <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
 
-        {/* Sessions & Completion */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Registers Finalized</span>
-              <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
-                <ClipboardCheck className="w-4 h-4" />
+            {/* Sessions & Completion */}
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Registers Finalized</span>
+                  <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
+                    <ClipboardCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-extrabold text-gray-900 mt-2">
+                  {analytics ? `${analytics.submittedSessions} / ${analytics.totalSessions}` : '0'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {analytics && analytics.openSessions > 0 ? (
+                    <span className="text-amber-600 font-medium">{analytics.openSessions} open drafts pending</span>
+                  ) : (
+                    'All registers submitted'
+                  )}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>Submitted vs total</span>
+                <Link href="/dashboard/attendance" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
+                  Daily Register <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-gray-900 mt-2">
-              {stats.loading ? '...' : analytics ? `${analytics.submittedSessions} / ${analytics.totalSessions}` : '0'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {analytics && analytics.openSessions > 0 ? (
-                <span className="text-amber-600 font-medium">{analytics.openSessions} open drafts pending</span>
-              ) : (
-                'All registers submitted'
-              )}
-            </p>
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-            <span>Submitted vs total</span>
-            <Link href="/dashboard/attendance" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
-              Daily Register <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
 
-        {/* Total Active Students */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Students</span>
-              <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
-                <GraduationCap className="w-4 h-4" />
+            {/* Total Active Students */}
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Students</span>
+                  <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-extrabold text-gray-900 mt-2">
+                  {stats.studentCount}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Enrolled across active batches</p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>Rosters active</span>
+                <Link href="/dashboard/students" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
+                  Roster <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-gray-900 mt-2">
-              {stats.loading ? '...' : stats.studentCount}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Enrolled across active batches</p>
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-            <span>Rosters active</span>
-            <Link href="/dashboard/students" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
-              Roster <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
 
-        {/* Classrooms & Centres */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Classrooms & Centres</span>
-              <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
-                <School className="w-4 h-4" />
+            {/* Classrooms & Centres */}
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Classrooms & Centres</span>
+                  <div className="p-2 bg-brand-50 rounded-lg text-brand-700">
+                    <School className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-extrabold text-gray-900 mt-2">
+                  {`${stats.classroomCount} / ${stats.schoolCount}`}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Cohorts in {stats.schoolCount} centres</p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>Tenant scoped</span>
+                <Link href="/dashboard/classrooms" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
+                  Classrooms <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-gray-900 mt-2">
-              {stats.loading ? '...' : `${stats.classroomCount} / ${stats.schoolCount}`}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Cohorts in {stats.schoolCount} centres</p>
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-            <span>Tenant scoped</span>
-            <Link href="/dashboard/classrooms" className="text-brand-700 font-medium hover:underline flex items-center gap-0.5">
-              Classrooms <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Main Grid: Live Activity Feed + Classroom Summary */}

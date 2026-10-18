@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import { StatusBadge, Button } from '@/components/ui/components';
+import { StatusBadge, Button, TableSkeleton, EmptyState } from '@/components/ui/components';
 import {
   BarChart3,
   Calendar,
@@ -797,14 +797,16 @@ export default function ReportsPage() {
             </div>
 
             {loading ? (
-              <div className="p-12 text-center text-gray-500">
-                <div className="inline-block w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs mt-3">Loading student attendance metrics...</p>
+              <div className="p-4">
+                <TableSkeleton rows={6} cols={6} />
               </div>
             ) : studentsReport.length === 0 ? (
-              <div className="p-10 text-center text-gray-400 text-sm">
-                No students found matching your filters.
-              </div>
+              <EmptyState
+                icon={GraduationCap}
+                title="No student reports found"
+                description="No attendance records were found for the selected date range and filter scope."
+                className="border-0 shadow-none py-10"
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
@@ -882,48 +884,57 @@ export default function ReportsPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">School & Code</th>
-                  <th className="py-3 px-4">Classroom</th>
-                  <th className="py-3 px-4 text-center">Enrolled</th>
-                  <th className="py-3 px-4 text-center">Sessions</th>
-                  <th className="py-3 px-4 text-center">Submitted</th>
-                  <th className="py-3 px-4 text-center">Draft</th>
-                  <th className="py-3 px-4 text-center">Present</th>
-                  <th className="py-3 px-4 text-center">Late</th>
-                  <th className="py-3 px-4 text-center">Absent</th>
-                  <th className="py-3 px-4 text-right">Attendance Rate</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {analytics?.classroomSummary.map(c => (
-                  <tr key={c.classroomId} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <p className="font-semibold text-gray-900">{c.schoolName}</p>
-                      <p className="text-xs font-mono text-gray-400">{c.schoolCode}</p>
-                    </td>
-                    <td className="py-3.5 px-4 font-medium text-gray-800">
-                      {c.classroomName}
-                      {c.gradeLevel && <span className="text-xs text-gray-400 block">{c.gradeLevel}</span>}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-gray-700">{c.totalEnrolled}</td>
-                    <td className="py-3.5 px-4 text-center font-medium text-gray-700">{c.totalSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{c.submittedSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-amber-700">{c.openSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{c.presentCount}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-amber-700">{c.lateCount}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-rose-700">{c.absentCount}</td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-brand-900">
-                      {c.attendancePercentage}%
-                    </td>
+          {!analytics?.classroomSummary || analytics.classroomSummary.length === 0 ? (
+            <EmptyState
+              icon={School}
+              title="No classroom attendance records"
+              description="No attendance registers have been conducted for classrooms in the selected date range."
+              className="border-0 shadow-none py-10"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">School & Code</th>
+                    <th className="py-3 px-4">Classroom</th>
+                    <th className="py-3 px-4 text-center">Enrolled</th>
+                    <th className="py-3 px-4 text-center">Sessions</th>
+                    <th className="py-3 px-4 text-center">Submitted</th>
+                    <th className="py-3 px-4 text-center">Draft</th>
+                    <th className="py-3 px-4 text-center">Present</th>
+                    <th className="py-3 px-4 text-center">Late</th>
+                    <th className="py-3 px-4 text-center">Absent</th>
+                    <th className="py-3 px-4 text-right">Attendance Rate</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {analytics.classroomSummary.map(c => (
+                    <tr key={c.classroomId} className="hover:bg-gray-50/60 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <p className="font-semibold text-gray-900">{c.schoolName}</p>
+                        <p className="text-xs font-mono text-gray-400">{c.schoolCode}</p>
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-gray-800">
+                        {c.classroomName}
+                        {c.gradeLevel && <span className="text-xs text-gray-400 block">{c.gradeLevel}</span>}
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-bold text-gray-700">{c.totalEnrolled}</td>
+                      <td className="py-3.5 px-4 text-center font-medium text-gray-700">{c.totalSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{c.submittedSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-amber-700">{c.openSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{c.presentCount}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-amber-700">{c.lateCount}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-rose-700">{c.absentCount}</td>
+                      <td className="py-3.5 px-4 text-right font-extrabold text-brand-900">
+                        {c.attendancePercentage}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -939,47 +950,56 @@ export default function ReportsPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Date</th>
-                  <th className="py-3 px-4 text-center">Registers Held</th>
-                  <th className="py-3 px-4 text-center">Submitted</th>
-                  <th className="py-3 px-4 text-center">Open Draft</th>
-                  <th className="py-3 px-4 text-center">Present</th>
-                  <th className="py-3 px-4 text-center">Late</th>
-                  <th className="py-3 px-4 text-center">Absent</th>
-                  <th className="py-3 px-4 text-center">Total Marked</th>
-                  <th className="py-3 px-4 text-right">Attendance Rate</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {analytics?.dailyTrends.map(day => (
-                  <tr key={day.date} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">
-                      {new Date(day.date).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-gray-800">{day.totalSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{day.submittedSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-amber-700">{day.openSessions}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{day.presentCount}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-amber-700">{day.lateCount}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-rose-700">{day.absentCount}</td>
-                    <td className="py-3.5 px-4 text-center font-bold text-gray-700">{day.totalMarked}</td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-brand-900">
-                      {day.attendancePercentage}%
-                    </td>
+          {!analytics?.dailyTrends || analytics.dailyTrends.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title="No daily registers recorded"
+              description="No attendance sessions were conducted or submitted during this date range."
+              className="border-0 shadow-none py-10"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4 text-center">Registers Held</th>
+                    <th className="py-3 px-4 text-center">Submitted</th>
+                    <th className="py-3 px-4 text-center">Open Draft</th>
+                    <th className="py-3 px-4 text-center">Present</th>
+                    <th className="py-3 px-4 text-center">Late</th>
+                    <th className="py-3 px-4 text-center">Absent</th>
+                    <th className="py-3 px-4 text-center">Total Marked</th>
+                    <th className="py-3 px-4 text-right">Attendance Rate</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {analytics.dailyTrends.map(day => (
+                    <tr key={day.date} className="hover:bg-gray-50/60 transition-colors">
+                      <td className="py-3.5 px-4 font-semibold text-gray-900">
+                        {new Date(day.date).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-bold text-gray-800">{day.totalSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{day.submittedSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-amber-700">{day.openSessions}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-emerald-700">{day.presentCount}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-amber-700">{day.lateCount}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-rose-700">{day.absentCount}</td>
+                      <td className="py-3.5 px-4 text-center font-bold text-gray-700">{day.totalMarked}</td>
+                      <td className="py-3.5 px-4 text-right font-extrabold text-brand-900">
+                        {day.attendancePercentage}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

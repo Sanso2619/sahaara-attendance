@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { Button, Input, Select, StatusBadge, Modal, ConfirmDialog, EmptyState } from '@/components/ui/components';
+import { Button, Input, Select, StatusBadge, Modal, ConfirmDialog, EmptyState, TableSkeleton } from '@/components/ui/components';
 import { Users, Plus, Search, Edit2, Power, School, UserCheck, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 
 interface ClassroomItem {
@@ -279,10 +279,7 @@ export default function ClassroomsManagementPage() {
       {/* Classroom Table */}
       <div className="mt-6">
         {loading ? (
-          <div className="py-16 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
-            <div className="w-6 h-6 border-2 border-brand-700 border-t-transparent rounded-full animate-spin" />
-            <span>Loading classrooms...</span>
-          </div>
+          <TableSkeleton rows={4} cols={5} />
         ) : classrooms.length === 0 ? (
           <EmptyState
             icon={Users}

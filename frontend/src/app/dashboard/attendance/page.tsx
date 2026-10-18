@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import { StatusBadge, Button } from '@/components/ui/components';
+import { StatusBadge, Button, TableSkeleton, EmptyState } from '@/components/ui/components';
 import {
   ClipboardCheck,
   Calendar,
@@ -700,18 +700,16 @@ export default function AttendancePage() {
             </div>
 
             {loadingSession ? (
-              <div className="p-12 text-center">
-                <div className="inline-block w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-gray-500 mt-3 font-medium">Loading classroom roster and attendance records...</p>
+              <div className="p-5">
+                <TableSkeleton rows={5} cols={3} />
               </div>
             ) : students.length === 0 ? (
-              <div className="p-12 text-center">
-                <Users className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-gray-800">No students enrolled</h4>
-                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-                  There are no active enrolled students in this classroom cohort. Enrol students under Students & Enrolment first.
-                </p>
-              </div>
+              <EmptyState
+                icon={Users}
+                title="No students enrolled"
+                description="There are no active enrolled students in this classroom cohort. Enrol students under Students & Enrolment first."
+                className="border-0 shadow-none rounded-none py-10"
+              />
             ) : (
               <div className="divide-y divide-gray-100">
                 {students.map((student, idx) => {

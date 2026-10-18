@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { Button, Input, Select, StatusBadge, Modal, ConfirmDialog, EmptyState } from '@/components/ui/components';
+import { Button, Input, Select, StatusBadge, Modal, ConfirmDialog, EmptyState, TableSkeleton } from '@/components/ui/components';
 import {
   GraduationCap,
   Plus,
@@ -467,10 +467,7 @@ export default function StudentsManagementPage() {
           {/* Students Directory Table */}
           <div className="mt-6">
             {loading ? (
-              <div className="py-16 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
-                <div className="w-6 h-6 border-2 border-brand-700 border-t-transparent rounded-full animate-spin" />
-                <span>Loading student records...</span>
-              </div>
+              <TableSkeleton rows={6} cols={6} />
             ) : students.length === 0 ? (
               <EmptyState
                 icon={GraduationCap}

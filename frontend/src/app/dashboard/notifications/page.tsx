@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import { Button, Modal, Input, Select } from '@/components/ui/components';
+import { Button, Modal, Input, Select, TableSkeleton, EmptyState } from '@/components/ui/components';
 import {
   Bell,
   CheckCircle2,
@@ -457,18 +457,16 @@ export default function NotificationsPage() {
             )}
 
             {loadingLog ? (
-              <div className="p-12 text-center text-gray-500 text-sm">
-                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-brand-700" />
-                Loading notification delivery logs...
+              <div className="p-4">
+                <TableSkeleton rows={6} cols={6} />
               </div>
             ) : deliveries.length === 0 ? (
-              <div className="p-12 text-center text-gray-500">
-                <Bell className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                <p className="font-semibold text-gray-800">No follow-up notification records found</p>
-                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-                  Follow-ups are automatically generated when attendance registers are finalized and submitted for absent or late students.
-                </p>
-              </div>
+              <EmptyState
+                icon={Bell}
+                title="No follow-up notification records found"
+                description="Follow-ups are automatically generated when attendance registers are finalized and submitted for absent or late students."
+                className="border-0 shadow-none py-10"
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 text-left text-xs">
