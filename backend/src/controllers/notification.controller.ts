@@ -9,6 +9,7 @@ import {
   NotificationEventType
 } from '../services/notification.service';
 import { emitNotificationsUpdated } from '../services/socket.service';
+import { recordAuditEvent } from '../services/audit.service';
 
 export const updateNotificationSettingsSchema = z.object({
   followUpsEnabled: z.boolean().optional(),
@@ -152,6 +153,22 @@ export async function updateNotificationSettingsHandler(req: Request, res: Respo
         lateTemplate || null
       ]
     );
+
+    await recordAuditEvent({
+      organizationId: targetOrgId,
+      actorUserId: req.user?.userId || null,
+      actorRole: role || null,
+      action: 'NOTIFICATION_SETTINGS_UPDATE',
+      targetType: 'NOTIFICATION_SETTINGS',
+      targetId: updated.rows[0].id,
+      ipAddress: (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.ip || req.socket.remoteAddress || null,
+      metadata: {
+        followUpsEnabled,
+        notifyAbsent,
+        notifyLate,
+        defaultChannel
+      }
+    });
 
     return res.status(200).json({
       message: 'Notification settings updated successfully.',
@@ -414,8 +431,9 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
 
   try {
     let selectQuery = `
-      SELECT nd.*, s.guardian_contact as "studentGuardianContact", s.first_name as "firstName",
-             s.last_name as "lastName", o.name as "orgName"
+      SELECT nd.*, s.guardian_contact as "studentGuardianContact",
+             COALESCE(s.guardian_consent_status, 'GRANTED') as "studentGuardianConsent",
+             s.first_name as "firstName", s.last_name as "lastName", o.name as "orgName"
       FROM notification_deliveries nd
       JOIN students s ON s.id = nd.student_id
       JOIN organizations o ON o.id = nd.organization_id
@@ -444,6 +462,13 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
     if (delivery.retry_count >= delivery.max_retries) {
       return res.status(400).json({
         error: `Maximum retry limit reached (${delivery.max_retries} attempts). Further retries are blocked to prevent abuse.`
+      });
+    }
+
+    // Consent check
+    if (delivery.studentGuardianConsent && delivery.studentGuardianConsent !== 'GRANTED') {
+      return res.status(400).json({
+        error: 'Cannot retry: Guardian notification consent has been withdrawn or is pending.'
       });
     }
 
@@ -491,6 +516,17 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
         timestamp: new Date().toISOString()
       });
 
+      await recordAuditEvent({
+        organizationId: delivery.organization_id,
+        actorUserId: req.user?.userId || null,
+        actorRole: role || null,
+        action: 'NOTIFICATION_RETRY_SUCCESS',
+        targetType: 'NOTIFICATION_DELIVERY',
+        targetId: id,
+        ipAddress: (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.ip || req.socket.remoteAddress || null,
+        metadata: { retryCount: newRetryCount, provider: result.provider }
+      });
+
       return res.status(200).json({
         message: 'Notification delivery retried and sent successfully.',
         status: 'SENT',
@@ -517,6 +553,17 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
         failed: 1,
         skipped: 0,
         timestamp: new Date().toISOString()
+      });
+
+      await recordAuditEvent({
+        organizationId: delivery.organization_id,
+        actorUserId: req.user?.userId || null,
+        actorRole: role || null,
+        action: 'NOTIFICATION_RETRY_FAILED',
+        targetType: 'NOTIFICATION_DELIVERY',
+        targetId: id,
+        ipAddress: (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.ip || req.socket.remoteAddress || null,
+        metadata: { retryCount: newRetryCount, error: result.errorMessage }
       });
 
       return res.status(200).json({

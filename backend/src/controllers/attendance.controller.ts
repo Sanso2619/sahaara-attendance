@@ -7,6 +7,7 @@ import {
   emitAttendanceUpdated,
   emitNotificationsUpdated
 } from '../services/socket.service';
+import { recordAuditEvent } from '../services/audit.service';
 
 export const saveAttendanceSchema = z.object({
   classroomId: z.string().uuid('Valid classroom ID required'),
@@ -440,6 +441,18 @@ export async function submitAttendanceHandler(req: Request, res: Response) {
     }
 
     await client.query('COMMIT');
+
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.ip || req.socket.remoteAddress || null;
+    await recordAuditEvent({
+      organizationId: targetOrgId,
+      actorUserId: userId,
+      actorRole: role,
+      action: 'ATTENDANCE_SUBMIT',
+      targetType: 'ATTENDANCE_SESSION',
+      targetId: sessionId,
+      ipAddress: clientIp,
+      metadata: { classroomId, date, recordsCount: records.length }
+    });
 
     // Real-time Event: attendance:submitted (minimal payload after commit)
     emitAttendanceSubmitted({

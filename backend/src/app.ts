@@ -14,6 +14,8 @@ import studentRoutes from './routes/student.routes';
 import attendanceRoutes from './routes/attendance.routes';
 import reportRoutes from './routes/report.routes';
 import notificationRoutes from './routes/notification.routes';
+import auditRoutes from './routes/audit.routes';
+import { csrfProtection } from './middleware/csrf';
 
 const app = express();
 
@@ -23,11 +25,13 @@ app.use(
     origin: env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Organization-ID']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Organization-ID', 'X-Requested-With']
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser(env.COOKIE_SECRET));
+app.use(csrfProtection);
+
 if (env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
@@ -43,10 +47,15 @@ app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
-// Global Error Handler
+// Global Safe Error Handler - Never leaks stack traces or SQL internals to client
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Unhandled Server Error:', err);
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Payload too large. Request body exceeds maximum allowed size (100kb).' });
+  }
+
+  console.error('Server Internal Error:', err?.message || err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

@@ -153,6 +153,7 @@ export async function processAttendanceFollowups(params: {
   const studentsRes = await pool.query(
     `SELECT s.id, s.first_name as "firstName", s.last_name as "lastName", s.roll_number as "rollNumber",
             s.guardian_name as "guardianName", s.guardian_contact as "guardianContact",
+            COALESCE(s.guardian_consent_status, 'GRANTED') as "guardianConsentStatus",
             sch.name as "schoolName", o.name as "organizationName"
      FROM students s
      JOIN schools sch ON sch.id = s.school_id
@@ -187,6 +188,34 @@ export async function processAttendanceFollowups(params: {
       schoolName: student.schoolName,
       organizationName: student.organizationName
     });
+
+    // Check Guardian Notification Consent
+    if (student.guardianConsentStatus && student.guardianConsentStatus !== 'GRANTED') {
+      await pool.query(
+        `INSERT INTO notification_deliveries (
+           organization_id, student_id, attendance_session_id, triggered_by_user_id,
+           recipient_name, recipient_contact, channel, event_type, status,
+           message_content, provider, error_message, is_simulated
+         )
+         VALUES ($1, $2, $3, $4, $5, NULL, $6, $7, 'SKIPPED', $8, $9, $10, $11)
+         ON CONFLICT (attendance_session_id, student_id, event_type, channel) DO NOTHING`,
+        [
+          organizationId,
+          student.id,
+          sessionId,
+          triggeredByUserId,
+          student.guardianName || 'Guardian',
+          channel,
+          eventType,
+          renderedMessage,
+          provider.name,
+          'Skipped: Guardian notification consent not granted or opted out.',
+          provider.isMock
+        ]
+      );
+      skippedCount++;
+      continue;
+    }
 
     const hasContact = Boolean(student.guardianContact && student.guardianContact.trim().length > 0);
 

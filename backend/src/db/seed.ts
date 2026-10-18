@@ -3,9 +3,8 @@ import { pool } from '../config/db';
 import { env } from '../config/env';
 
 export async function seedDemoData() {
-  if (env.NODE_ENV === 'production') {
-    console.error('❌ SEEDING BLOCKED: Automatic seeding is forbidden in production environment.');
-    return;
+  if (process.env.NODE_ENV === 'production' || env.NODE_ENV === 'production') {
+    throw new Error('Production safety guard: Seeding demo or test data is forbidden in production environment.');
   }
 
   console.log('🌱 Seeding anonymized development data...');
