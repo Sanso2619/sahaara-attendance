@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { pool } from '../config/db';
 import { processAttendanceFollowups } from '../services/notification.service';
+import {
+  emitAttendanceSubmitted,
+  emitAttendanceUpdated,
+  emitNotificationsUpdated
+} from '../services/socket.service';
 
 export const saveAttendanceSchema = z.object({
   classroomId: z.string().uuid('Valid classroom ID required'),
@@ -293,6 +298,17 @@ export async function saveAttendanceDraftHandler(req: Request, res: Response) {
     }
 
     await client.query('COMMIT');
+
+    // Real-time Event: attendance:updated for draft save
+    emitAttendanceUpdated({
+      sessionId,
+      classroomId,
+      organizationId: targetOrgId,
+      date,
+      status: 'OPEN',
+      timestamp: new Date().toISOString()
+    });
+
     return res.status(200).json({
       message: 'Attendance progress saved as draft.',
       session: {
@@ -425,6 +441,17 @@ export async function submitAttendanceHandler(req: Request, res: Response) {
 
     await client.query('COMMIT');
 
+    // Real-time Event: attendance:submitted (minimal payload after commit)
+    emitAttendanceSubmitted({
+      sessionId,
+      classroomId,
+      organizationId: targetOrgId,
+      date,
+      status: 'SUBMITTED',
+      recordsCount: records.length,
+      timestamp: new Date().toISOString()
+    });
+
     // 5. Trigger automated guardian notifications (safe follow-up processor)
     let notifications = { totalTriggered: 0, sent: 0, failed: 0, skipped: 0 };
     try {
@@ -436,6 +463,17 @@ export async function submitAttendanceHandler(req: Request, res: Response) {
         triggeredByUserId: userId!,
         records
       });
+
+      if (notifications.totalTriggered > 0) {
+        emitNotificationsUpdated({
+          organizationId: targetOrgId,
+          totalTriggered: notifications.totalTriggered,
+          sent: notifications.sent,
+          failed: notifications.failed,
+          skipped: notifications.skipped,
+          timestamp: new Date().toISOString()
+        });
+      }
     } catch (notifErr) {
       console.error('Failed to trigger attendance follow-up notifications:', notifErr);
     }

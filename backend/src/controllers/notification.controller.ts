@@ -8,6 +8,7 @@ import {
   NotificationChannel,
   NotificationEventType
 } from '../services/notification.service';
+import { emitNotificationsUpdated } from '../services/socket.service';
 
 export const updateNotificationSettingsSchema = z.object({
   followUpsEnabled: z.boolean().optional(),
@@ -481,6 +482,15 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
         [contactToUse, newRetryCount, result.provider, result.providerMessageId || null, id]
       );
 
+      emitNotificationsUpdated({
+        organizationId: delivery.organization_id,
+        totalTriggered: 1,
+        sent: 1,
+        failed: 0,
+        skipped: 0,
+        timestamp: new Date().toISOString()
+      });
+
       return res.status(200).json({
         message: 'Notification delivery retried and sent successfully.',
         status: 'SENT',
@@ -499,6 +509,15 @@ export async function retryNotificationDeliveryHandler(req: Request, res: Respon
          WHERE id = $5`,
         [contactToUse, newRetryCount, result.provider, result.errorMessage || 'Retry delivery failed', id]
       );
+
+      emitNotificationsUpdated({
+        organizationId: delivery.organization_id,
+        totalTriggered: 1,
+        sent: 0,
+        failed: 1,
+        skipped: 0,
+        timestamp: new Date().toISOString()
+      });
 
       return res.status(200).json({
         message: 'Notification delivery retry failed.',
