@@ -2,6 +2,33 @@ import fs from 'fs';
 import path from 'path';
 import { pool } from '../config/db';
 
+export function getMigrationsDir(): string {
+  // 1. Direct subfolder (development tsx or when copied to dist/db/migrations)
+  const directPath = path.join(__dirname, 'migrations');
+  if (fs.existsSync(directPath)) {
+    return directPath;
+  }
+
+  // 2. Relative to compiled output (dist/db -> src/db/migrations)
+  const srcPath = path.resolve(__dirname, '../../src/db/migrations');
+  if (fs.existsSync(srcPath)) {
+    return srcPath;
+  }
+
+  // 3. Fallback relative to current working directory
+  const rootPath = path.resolve(process.cwd(), 'src/db/migrations');
+  if (fs.existsSync(rootPath)) {
+    return rootPath;
+  }
+
+  const backendSrcPath = path.resolve(process.cwd(), 'backend/src/db/migrations');
+  if (fs.existsSync(backendSrcPath)) {
+    return backendSrcPath;
+  }
+
+  throw new Error(`Unable to resolve migrations directory. Checked: ${directPath}, ${srcPath}`);
+}
+
 export async function runMigrations() {
   console.log('🔄 Running database migrations...');
   const client = await pool.connect();
@@ -18,7 +45,7 @@ export async function runMigrations() {
       );
     `);
 
-    const migrationsDir = path.join(__dirname, 'migrations');
+    const migrationsDir = getMigrationsDir();
     const files = fs.readdirSync(migrationsDir).sort();
 
     for (const file of files) {

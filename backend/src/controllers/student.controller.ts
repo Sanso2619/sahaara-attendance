@@ -13,7 +13,7 @@ export const createStudentSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional().nullable(),
   guardianName: z.string().optional().nullable(),
   guardianContact: z.string().optional().nullable(),
-  guardianConsentStatus: z.enum(['GRANTED', 'WITHDRAWN', 'PENDING']).default('GRANTED'),
+  guardianConsentStatus: z.enum(['GRANTED', 'WITHDRAWN', 'PENDING']).default('PENDING'),
   classroomId: z.string().uuid().optional().nullable()
 });
 
@@ -247,7 +247,7 @@ export async function createStudentHandler(req: Request, res: Response) {
           gender || null,
           guardianName?.trim() || null,
           guardianContact?.trim() || null,
-          guardianConsentStatus || 'GRANTED'
+          guardianConsentStatus || 'PENDING'
         ]
       );
 
